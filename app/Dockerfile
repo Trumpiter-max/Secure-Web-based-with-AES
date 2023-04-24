@@ -1,18 +1,20 @@
-# syntax=docker/dockerfile:1
+FROM python:3.10-alpine
 
-FROM python:3.10-alpine3.15
+RUN apk add --no-cache --virtual .build-deps gcc musl-dev linux-headers libffi-dev openssl-dev
+
+ENV GROUP_ID=1000 \
+    USER_ID=1000
+
+WORKDIR /var/www/
+ADD . /var/www/
 
 RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
 
-RUN adduser -D appuser
-USER appuser
-WORKDIR /home/appuser
+RUN addgroup -g $GROUP_ID www
+RUN adduser -D -u $USER_ID -G www www -s /bin/sh
+USER www
 
-ENV PATH="/home/appuser/.local/bin:${PATH}"
+EXPOSE 5000
 
-COPY --chown=appuser:appuser requirements.txt requirements.txt
-RUN pip install --user -r requirements.txt
-
-COPY --chown=appuser:appuser . .
-
-CMD ["python", "-m", "flask", "run"]
+CMD ["python", "app.py"]
