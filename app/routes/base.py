@@ -3,8 +3,6 @@ import pymongo
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import socket
-import bcrypt
-from utils.aes_mode_gcm import encrypt, decrypt
 import os
 
 def get_db():
@@ -13,6 +11,6 @@ def get_db():
                         username='admin', 
                         password='admin',
                         authSource="admin")
-    db = client["test"] # connect to database
+    db = client["sampledb"] # connect to database
     return db
 

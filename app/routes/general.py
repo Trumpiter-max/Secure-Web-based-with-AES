@@ -9,3 +9,7 @@ def index():
 @general_blueprint.route("/about")
 def about():
     return render_template('about.html')
+
+@general_blueprint.route("/help")
+def help():
+    return render_template('help.html')

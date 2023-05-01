@@ -56,5 +56,4 @@ if __name__ == "__main__":
     with open('encrypted.pdf', 'rb') as encrypted_file:
         ciphertext = encrypted_file.read()
     decrypt(key_for_decrypt, iv, auth_tag, associated_data, ciphertext)
-
 """

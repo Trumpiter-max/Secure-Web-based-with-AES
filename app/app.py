@@ -1,11 +1,15 @@
 from routes.base import *
 from routes.general import general_blueprint
 from routes.user import user_blueprint
+from routes.secure import secure_blueprint
+from dotenv import load_dotenv
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'd855496646e88b7c12e0a80135bef652'
+load_dotenv()
+app.config['SECRET_KEY'] = os.getenv("APP_SECRET")
 app.register_blueprint(general_blueprint)
 app.register_blueprint(user_blueprint)
+app.register_blueprint(secure_blueprint)
 
 @app.route('/robots.txt')
 @app.route('/sitemap.xml')
