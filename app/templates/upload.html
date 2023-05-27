@@ -1,5 +1,39 @@
 {% extends "base.html" %}
 
-{% block title %} Upload {% endblock %}
+{% block title %} Upload documents {% endblock %}
 {% block content %}
+
+<br/>
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul class=flashes>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+
+<div class="file-upload">
+    
+    <form enctype = "multipart/form-data" action = "/upload" method = "post">
+        <button class="file-upload-btn" type="button" onclick="$('.file-upload-input').trigger('click')">Add file</button>
+    
+        <div class="file-upload-wrap">
+            <input class="file-upload-input" type='file' onchange="readURL(this);" accept="application/pdf" name="file"/>
+            <div class="drag-text">
+                <h3>Drag and drop a file here or select add file</h3>
+            </div>
+        </div>
+
+        <div class="file-upload-content">
+            <div class="file-title-wrap">
+            <button type="button" onclick="removeUpload()" class="remove-file">Remove <span class="file-title">Uploaded file</span></button>
+            <p><input type = "submit" value = "Submit" /></p>
+        </div>
+    </form>
+</div>
+
+
 {% endblock %}

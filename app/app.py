@@ -11,11 +11,11 @@ app.register_blueprint(general_blueprint)
 app.register_blueprint(user_blueprint)
 app.register_blueprint(secure_blueprint)
 
+
 @app.route('/robots.txt')
 @app.route('/sitemap.xml')
 def static_from_root():
     return send_from_directory(app.static_folder, request.path[1:])
-
 
 if __name__ == "__main__":
 	port = int(os.environ.get('PORT', 5000))
