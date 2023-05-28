@@ -18,7 +18,7 @@ TEMP_PAH = "var/www/storage/temp/"
 
 # Config logging
 
-# config log format file for flask
+# config log format file for flask without using gunicorn
 dictConfig(
     {
         "version": 1,

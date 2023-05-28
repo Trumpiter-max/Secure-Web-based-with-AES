@@ -12,6 +12,10 @@ ENV GROUP_ID=1000 \
 WORKDIR /var/www/
 ADD . /var/www/
 
+# Copy certificates
+RUN mkdir -p /var/www/certificates
+COPY ../certificates/* /var/www/certificates/
+
 # Install PBC from source 
 RUN cd /var/www/lib/pbc-0.5.14 && ./configure LDFLAGS="-lgmp" && make && make install && ldconfig
 
