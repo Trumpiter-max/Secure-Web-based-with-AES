@@ -25,26 +25,17 @@ services:
     networks:
       - mongo_net
 
-  #webserver:
-    #build:
-      #context: nginx
-      #dockerfile: Dockerfile
-    #container_name: webserver
-    #restart: unless-stopped
-    #environment:
-      #APP_ENV: "prod"
-      #APP_NAME: "webserver"
-      #APP_DEBUG: "false"
-      #SERVICE_NAME: "webserver"
-    #ports:
-      #- "80:80"
-      #- "443:443"
-    #volumes:
-      #- nginxdata:/var/log/nginx
-    #depends_on:
-      #- webservice
-    #networks:
-      #- mongo_net
+  webserver:
+    container_name: webserver
+    restart: unless-stopped
+    build: ./nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - webservice
+    networks:
+      - mongo_net
 
   mongodb:
     image: mongo:latest

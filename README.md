@@ -6,6 +6,7 @@
   - [Table of contents](#table-of-contents)
   - [Get started](#get-started)
     - [Requirements](#requirements)
+      - [Libraries](#libraries)
     - [How to use](#how-to-use)
   - [References](#references)
        
@@ -15,23 +16,25 @@
 
 ### Requirements
 
-- Python version: 3.10.9
-- OS environment: alpine linux
+- Python version: 3.8
+- OS environment: Ubuntu 20.04 LTS linux
 - Docker environment: in progress
 - Database engine: MongoDB 4.0.8
+
+#### Libraries
 
 ### How to use
 
 Run container
 
 ```
-  docker-compose up -d
+  docker-compose up 
 ```
 
 Close docker-compose
 
 ```
-  docker-compose down -v
+  docker-compose down 
 ```
 
 ## References

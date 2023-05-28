@@ -13,8 +13,8 @@ import hashlib
 
 # Some defined variables
 
-DOCUMENT_PATH = os.getcwd() + "/storage/documents/"
-TEMP_PAH = os.getcwd() + "/storage/temp/"
+DOCUMENT_PATH = "/var/www/storage/documents/"
+TEMP_PAH = "var/www/storage/temp/"
 
 # Config logging
 
