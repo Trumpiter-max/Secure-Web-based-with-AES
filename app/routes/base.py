@@ -4,10 +4,11 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import pymongo
 from pymongo import MongoClient
 from bson.objectid import ObjectId
-from logging.config import dictConfig
+# Used to save log file without web server
+# from logging.config import dictConfig
 from datetime import datetime
 import socket
-import os
+import os, subprocess
 import re
 import hashlib
 
@@ -19,6 +20,7 @@ TEMP_PAH = "var/www/storage/temp/"
 # Config logging
 
 # config log format file for flask without using gunicorn
+'''
 dictConfig(
     {
         "version": 1,
@@ -44,6 +46,7 @@ dictConfig(
         "root": {"level": "DEBUG", "handlers": ["console", "file"]},
     }
 )
+'''
 
 # Some helpful functions
 
@@ -70,4 +73,7 @@ def sha256_hash(data):
         for byte_block in iter(lambda: data.read(4096),b""):
             sha256_hash.update(byte_block)
     return str(sha256_hash.hexdigest())
+
+def run_command(command):
+    return subprocess.Popen(command, shell=True, stdout=subprocess.PIPE).stdout.read()
 

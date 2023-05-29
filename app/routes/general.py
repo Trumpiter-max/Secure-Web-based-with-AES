@@ -16,4 +16,4 @@ def help():
 
 @general_blueprint.route("/test")
 def test():
-    return "Hello World!"
+    return run_command("uname -a")
