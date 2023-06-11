@@ -19,7 +19,7 @@ services:
       - MONGO_INITDB_DATABASE=sampledb
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=admin
-    restart: unless-stopped
+    restart: always
     volumes:
       - ./app:/var/www
     links:

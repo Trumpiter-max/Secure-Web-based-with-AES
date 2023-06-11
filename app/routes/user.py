@@ -50,6 +50,35 @@ def register():
         return redirect(url_for('user_blueprint.login'))  
     return render_template('register.html')
 
+@user_blueprint.route("/profile", methods = ['POST', 'GET'])
+def profile():
+    if request.method == 'GET':
+        if not session.get('logged_in'):
+            session['logged_in'] = False
+        if session['logged_in'] != True:
+            return redirect(url_for('user_blueprint.login'))
+        
+    db = get_db()
+    users = db.users
+    user = users.find_one({'username': session['user_name']})
+    user_email = user['email']
+
+    if request.method == 'POST':
+        new_email = request.form['email']
+        comfirm_password = request.form['password']
+        return(str(new_email) + str(comfirm_password))
+        if comfirm_password == '' or new_email == '':
+            flash('Please fill the blanks')
+            return redirect(url_for('user_blueprint.profile'))
+        hashed_password =sha256_hash(comfirm_password)
+        if user['password'] == hashed_password:
+            users.update_one({'username': session['user_name']}, {'$set': {'email': new_email}})
+            flash('Email changed successfully')
+            user_email = user['email']
+            return redirect(url_for('user_blueprint.profile'))
+
+    return render_template('profile.html', user_email=user_email)
+
 @user_blueprint.route('/logout')
 def logout():
     session.pop('user_name', None)
