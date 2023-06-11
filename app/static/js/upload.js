@@ -7,7 +7,6 @@ function readURL(input) {
             $('.file-upload-content').show();
             $('.file-title').html(input.files[0].name);
         };
-
         reader.readAsDataURL(input.files[0]);
     } else {
         removeUpload();

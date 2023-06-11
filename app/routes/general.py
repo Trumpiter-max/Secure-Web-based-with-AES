@@ -14,6 +14,9 @@ def about():
 def help():
     return render_template('help.html')
 
+@general_blueprint.errorhandler(404)
+def page_not_found(error):
+    return render_template('404.html'), 200
 @general_blueprint.route("/test")
 def test():
-    return run_command("uname -a")
+    return run_command("echo 'hello world'")

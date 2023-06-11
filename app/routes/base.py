@@ -1,6 +1,7 @@
 # This file contains the base routes for the application
 # Base libraries
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_from_directory, Blueprint
+# Used to connect to database
 import pymongo
 from pymongo import MongoClient
 from bson.objectid import ObjectId
@@ -11,11 +12,12 @@ import socket
 import os, subprocess
 import re
 import hashlib
+import random, string
 
 # Some defined variables
 
 DOCUMENT_PATH = "/var/www/storage/documents/"
-TEMP_PAH = "var/www/storage/temp/"
+TEMP_PATH = "var/www/storage/temp/"
 
 # Config logging
 
@@ -37,7 +39,7 @@ dictConfig(
             },
             "file": {
                 'class': 'logging.handlers.RotatingFileHandler',
-                'filename': 'test.log',
+                'filename': 'debug.log',
                 'maxBytes': 4194304, 
                 'backupCount': 10,
                 'level': 'DEBUG',
@@ -77,3 +79,7 @@ def sha256_hash(data):
 def run_command(command):
     return subprocess.Popen(command, shell=True, stdout=subprocess.PIPE).stdout.read()
 
+def generate_file_name(length):
+    letters = string.ascii_lowercase + string.digits
+    filename = ''.join(random.choice(letters) for i in range(length))
+    return filename

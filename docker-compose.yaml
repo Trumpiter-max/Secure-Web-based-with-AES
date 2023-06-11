@@ -6,6 +6,8 @@ services:
     build: 
       context: ./app
       dockerfile: Dockerfile
+    cpus: 8.0 # Change this to the number of cores to boost performance
+    mem_limit: 6144m
     ports:
       - 5000:5000
     container_name: webservice
