@@ -66,7 +66,6 @@ def profile():
     if request.method == 'POST':
         new_email = request.form['email']
         comfirm_password = request.form['password']
-        return(str(new_email) + str(comfirm_password))
         if comfirm_password == '' or new_email == '':
             flash('Please fill the blanks')
             return redirect(url_for('user_blueprint.profile'))
