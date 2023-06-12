@@ -69,7 +69,7 @@ def generate_key():
     # Encrypt the input symmetric key using the CP-ABE scheme
     ct = cpabe.encrypt(loaded_pk, input_symmetric_key_gt, P, U)
     # Save the encrypted symmetric key to a file
-    encrypted_key_file = "/var/www/storage/keys/cpabe_key/encrypted_object.bin"
+    encrypted_key_file = "/var/www/storage/keys/cpabe_key/encrypted_key.bin"
     with open(encrypted_key_file, 'wb') as f:
         f.write(objectToBytes(ct, groupObj))
     return rand_bytes[:32]
@@ -126,7 +126,7 @@ def decrypt_key():
     if result:
     	P += ['TAG']
     dk = cpabe.keygen(loaded_pk, loaded_mk, P, U)
-    encrypted_key_file = "/var/www/storage/keys/cpabe_key/encrypted_object.bin"
+    encrypted_key_file = "/var/www/storage/keys/cpabe_key/encrypted_key.bin"
     # Load the encrypted symmetric key from the file
     with open(encrypted_key_file, "rb") as f:
         loaded_ct = bytesToObject(f.read(), groupObj)
@@ -134,4 +134,37 @@ def decrypt_key():
     decrypted_key_gt = cpabe.decrypt(loaded_pk, dk, loaded_ct)
     decrypted_key_bytes = objectToBytes(decrypted_key_gt, groupObj)
     decrypted_key_bytes = decrypted_key_bytes[:32]
+    return decrypted_key_bytes
+
+def decrypt_IV():
+    public_key_file = "/var/www/storage/keys/cpabe_key/public_key.bin"
+    # Load the public key from the file
+    with open(public_key_file, "rb") as f:
+        loaded_pk = bytesToObject(f.read(), groupObj)
+    # Convert the inner dictionary keys back to integers
+    for key in loaded_pk:
+        if isinstance(loaded_pk[key], dict):
+            loaded_pk[key] = {int(inner_key): value for inner_key, value in loaded_pk[key].items()}
+    master_key_file = "/var/www/storage/keys/cpabe_key/master_key.bin"
+    # Load the master key from the file
+    with open(master_key_file, "rb") as f:
+        loaded_mk = bytesToObject(f.read(), groupObj)
+    file_name = "/var/www/storage/attribute/Attribute_list.txt"
+    # Load the Attribute from a text file
+    loaded_B = load_list_from_txt(file_name)
+    B = set_up(loaded_B)
+    P = load_list_from_txt(policy_name)
+    result = contains_list(P, B)
+    print(result)
+    if result:
+    	P += ['TAG']
+    dk = cpabe.keygen(loaded_pk, loaded_mk, P, U)
+    encrypted_key_file = "/var/www/storage/keys/cpabe_key/encrypted_IV.bin"
+    # Load the encrypted symmetric key from the file
+    with open(encrypted_key_file, "rb") as f:
+        loaded_ct = bytesToObject(f.read(), groupObj)
+    # Decrypt the symmetric key using the CP-ABE scheme
+    decrypted_key_gt = cpabe.decrypt(loaded_pk, dk, loaded_ct)
+    decrypted_key_bytes = objectToBytes(decrypted_key_gt, groupObj)
+    decrypted_key_bytes = decrypted_key_bytes[:12]
     return decrypted_key_bytes
