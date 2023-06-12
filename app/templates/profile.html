@@ -32,11 +32,10 @@
                                     <span class="text-primary">{{ title }}</span>
                                 </div>
                                 <ul class="list-unstyled mb-1-9">
-                                    <li class="mb-2 mb-xl-3 display-28"><span class="display-26 text-secondary me-2 font-weight-600">Position:</span> Customer </li>
-                                    <li class="mb-2 mb-xl-3 display-28"><span class="display-26 text-secondary me-2 font-weight-600">Experience:</span> 10 Years</li>
+                                    <li class="mb-2 mb-xl-3 display-28"><span class="display-26 text-secondary me-2 font-weight-600">Full name:</span> {{ full_name }} </li>
+                                    <li class="mb-2 mb-xl-3 display-28"><span class="display-26 text-secondary me-2 font-weight-600">Role:</span> {{ role }} </li>
                                     <li class="mb-2 mb-xl-3 display-28"><span class="display-26 text-secondary me-2 font-weight-600">Email:</span> {{ user_email }}</li>
-                                    <li class="mb-2 mb-xl-3 display-28"><span class="display-26 text-secondary me-2 font-weight-600">Organize:</span> Unreal company </li>
-                                    <li class="display-28"><span class="display-26 text-secondary me-2 font-weight-600">Level:</span> Employee</li>
+                                    <li class="mb-2 mb-xl-3 display-28"><span class="display-26 text-secondary me-2 font-weight-600">Organization:</span> {{ organization }} </li>
                                 </ul>
                             </div>
                         </div>
@@ -51,7 +50,20 @@
 
                         <form class="form-profile" action="/profile" method="POST">
                             <label for="email" class="sr-only">Email</label>
-                            <input type="email" name="email" id="email" class="form-control" placeholder="Type your email" required autofocus><br/>
+                            <input type="email" name="email" id="email" class="form-control" placeholder="Type your email">
+                            
+                            <label for="fullname" class="sr-only">Full name</label>
+                            <input type="name" name="fullname" id="fullname" class="form-control" placeholder="Type your full name">
+                            
+                            <label for="organize" class="sr-only">Organization</label>
+                            <input type="name" name="organize" id="organize" class="form-control" placeholder="Type your organization"> 
+                            
+                            <select name="role" class="form-select form-control" aria-label="Select your role">
+                                <option selected>Select your role</option>
+                                <option value="Legal Assistant">Legal Assistant</option>
+                                <option value="Property Manager">Property Manager</option>
+                            </select>
+
                             <label for="inputPassword" class="sr-only">Password</label>
                             <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required><br/>
                             <button id="btnSignUp" class="btn btn-lg btn-primary btn-block" onclick = 'this.form.submit();' type="button">Change</button>

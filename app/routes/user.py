@@ -44,7 +44,7 @@ def register():
             return redirect(url_for('user_blueprint.login'))
         
         hashed_password =sha256_hash(request.form['password'])
-        userdictionary = {'username': request.form['username'], 'password': hashed_password, 'email': request.form['email']}
+        userdictionary = {'username': request.form['username'], 'password': hashed_password, 'email': request.form['email'], 'fullname': 'Unknown', 'role': 'Unknown', 'organization': 'Unknown'}
         users.insert_one(userdictionary)
         flash('User registered successfully')
         return redirect(url_for('user_blueprint.login'))  
@@ -62,21 +62,38 @@ def profile():
     users = db.users
     user = users.find_one({'username': session['user_name']})
     user_email = user['email']
+    full_name = user['fullname']
+    role = user['role']
+    organization = user['organization']
 
     if request.method == 'POST':
         new_email = request.form['email']
+        new_name = request.form['fullname']
+        new_organization = request.form['organize']
+        new_role = request.form['role']
         comfirm_password = request.form['password']
-        if comfirm_password == '' or new_email == '':
-            flash('Please fill the blanks')
+
+        if comfirm_password == '':
+            flash('This change requires your password')
             return redirect(url_for('user_blueprint.profile'))
         hashed_password =sha256_hash(comfirm_password)
-        if user['password'] == hashed_password:
-            users.update_one({'username': session['user_name']}, {'$set': {'email': new_email}})
-            flash('Email changed successfully')
-            user_email = user['email']
-            return redirect(url_for('user_blueprint.profile'))
 
-    return render_template('profile.html', user_email=user_email)
+        if user['password'] == hashed_password:
+            if new_email:
+                users.update_one({'username': session['user_name']}, {'$set': {'email': new_email}})
+
+            if new_name:
+                users.update_one({'username': session['user_name']}, {'$set': {'fullname': new_name}})
+
+            if new_organization:
+                users.update_one({'username': session['user_name']}, {'$set': {'organization': new_organization}})
+            
+            if new_role:
+                users.update_one({'username': session['user_name']}, {'$set': {'role': new_role}})
+
+            flash('Changed successfully')
+            return redirect(url_for('user_blueprint.profile'))
+    return render_template('profile.html', user_email=user_email, full_name=full_name, role=role, organization=organization)
 
 @user_blueprint.route('/logout')
 def logout():
