@@ -7,7 +7,7 @@ from cryptography.hazmat.primitives.ciphers.algorithms import AES
 from cryptography.hazmat.primitives.ciphers.modes import GCM
 from cryptography.hazmat.primitives.hashes import SHA256
 from cryptography.hazmat.backends import default_backend
-from .funcCPABE import generate_key, decrypt_key
+from .funcCPABE import generate_key, generate_IV, decrypt_key
 
 def create_key():
     # Declare the key and IV
@@ -17,7 +17,7 @@ def create_key():
 
 def create_iv():
     # For AES GCM, NIST recommends 96 bit IVs
-    iv = os.urandom(96 // 8)
+    iv = generate_IV()
     return iv
 
 def encrypt(key, iv, associated_data, plaintext, file_path):
