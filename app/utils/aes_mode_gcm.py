@@ -7,11 +7,12 @@ from cryptography.hazmat.primitives.ciphers.algorithms import AES
 from cryptography.hazmat.primitives.ciphers.modes import GCM
 from cryptography.hazmat.primitives.hashes import SHA256
 from cryptography.hazmat.backends import default_backend
+from funcCPABE import generate_key, decrypt_key
 
 def create_key():
     # Declare the key and IV
     # 256-bit symmetric key
-    key = os.urandom(256 // 8)
+    key = generate_key()
     return key
 
 def create_iv():
