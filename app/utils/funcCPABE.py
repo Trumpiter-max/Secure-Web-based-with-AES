@@ -74,6 +74,35 @@ def generate_key():
         f.write(objectToBytes(ct, groupObj))
     return rand_bytes[:32]
     
+def generate_IV():
+    groupObj = PairingGroup('BN254')
+    cpabe = CPabe_SP21(groupObj)
+    rand_Obj = groupObj.random(GT)
+    rand_bytes = objectToBytes(rand_Obj, groupObj)
+    public_key_file = "/var/www/storage/keys/cpabe_key/public_key.bin"
+    master_key_file = "/var/www/storage/keys/cpabe_key/master_key.bin"
+    # Load the public key from the file
+    with open(public_key_file, "rb") as f:
+    	loaded_pk = bytesToObject(f.read(), groupObj)
+	# Convert the inner dictionary keys back to integers
+    for key in loaded_pk:
+        if isinstance(loaded_pk[key], dict):
+            loaded_pk[key] = {int(inner_key): value for inner_key, value in loaded_pk[key].items()}
+	# Load the master key from the file
+    with open(master_key_file, "rb") as f:
+        loaded_mk = bytesToObject(f.read(), groupObj) 
+    P = load_list_from_txt(policy_name)
+    input_symmetric_key_gt = bytesToObject(rand_bytes, groupObj)
+    # Encrypt the input symmetric key using the CP-ABE scheme
+    ct = cpabe.encrypt(loaded_pk, input_symmetric_key_gt, P, U)
+    # Save the encrypted symmetric key to a file
+    encrypted_key_file = "/var/www/storage/keys/cpabe_key/encrypted_IV.bin"
+    with open(encrypted_key_file, 'wb') as f:
+        f.write(objectToBytes(ct, groupObj))
+    return rand_bytes[:12]	
+
+	
+	
 def decrypt_key():
     public_key_file = "/var/www/storage/keys/cpabe_key/public_key.bin"
     # Load the public key from the file
