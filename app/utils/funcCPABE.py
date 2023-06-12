@@ -31,7 +31,7 @@ def choose_policy_name(choice):
 
 #user_input = int(input("Please choose a policy by entering a number (1-4): "))
 #policy_name = choose_policy_name(user_input)
-policy_name = "Property_policy.txt"
+policy_name = "policy/Property_policy.txt"
 
 # Define attribute universe
 Attributes = ['ABC Real Estate Agency', 'Green Spaces', 'Thu Duc Peoples Committee', 'Property Manager', 'Legal Assistant', 'Architecture', 'Real Estate Brokers', 'Financial Experts', 'Chairman', 'Director Of Real Estate']
