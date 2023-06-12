@@ -29,7 +29,7 @@ def login():
                 return redirect(url_for('general_blueprint.index'))
             
         flash('Username or password is wrong, try again')
-        return redirect(url_for('user_blueprint.register'))  
+        return redirect(url_for('user_blueprint.login'))  
     return render_template('login.html')
 
 @user_blueprint.route("/register", methods = ['POST', 'GET'])

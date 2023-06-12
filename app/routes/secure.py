@@ -27,12 +27,13 @@ def upload():
         # Some config for file upload
         file_hash = sha256_hash(file)
         file_name = generate_file_name(30)
-        file_name_pdf = file_name + ".pdf"
+        file_name_pdf = str(file_name) + '.pdf'
         time_save = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         author_name = session['user_name']
         filetitle = request.form.get('title')
         passcode = request.form.get('passcode')
         passcode = bytes(passcode, 'utf-8') # convert to bytes for encryption
+        origin_file = file # backup origin file
         # Digital signature for file
         # Create key pair
         private_key = create_private_key()
@@ -51,7 +52,7 @@ def upload():
         # Save encrypted file to storage
         encrypt(aes_key, aes_iv, passcode, file.read(), os.path.join(DOCUMENT_PATH + 'encrypted/', file_name))
         # Save origin file to storage
-        file.save(os.path.join(DOCUMENT_PATH + 'origin/', file_name_pdf))
+        origin_file.save(os.path.join(DOCUMENT_PATH + 'origin/', file_name_pdf))
 
         # Save to database
         db = get_db()
