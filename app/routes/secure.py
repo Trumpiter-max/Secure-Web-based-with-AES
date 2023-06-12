@@ -75,8 +75,59 @@ def load():
 
     return render_template("load.html", documents=documents)
 
-@secure_blueprint.route("/download")
-def download():
-    filename = request.args.get('filename')
-    file_path = os.path.join(DOCUMENT_PATH + 'origin/', str(filename))
-    return send_file(file_path, as_attachment=True)
+#@secure_blueprint.route("/download")
+#def download():
+#    filename = request.args.get('filename')
+#    file_path = os.path.join(DOCUMENT_PATH + 'origin/', str(filename))
+#    return send_file(file_path, as_attachment=True)
+
+@secure_blueprint.route("/download/<filename>", methods = ['POST', 'GET'])
+def download(filename):
+    if request.method == 'POST':
+        # Get the passcode from the form
+        passcode = request.form.get('passcode')
+        passcode = bytes(passcode, 'utf-8')  # convert to bytes for decryption
+
+        # Load encrypted file from storage
+        encrypted_file_path = os.path.join(DOCUMENT_PATH + 'encrypted/', str(filename))
+        with open(encrypted_file_path, 'rb') as encrypted_file:
+            encrypted_data = encrypted_file.read()
+        
+        # Decrypt the file
+        aes_key = decrypt_key()
+        aes_iv = decrypt_IV()
+        decrypted_data = decrypt(aes_key, aes_iv, passcode, encrypted_data)
+        
+
+        # Load signed file from storage
+        signed_file_path = os.path.join(DOCUMENT_PATH + 'signed/', str(filename))
+        with open(signed_file_path, 'rb') as signed_file:
+            signed_data = signed_file.read()
+
+        # Load public key from storage
+        public_key_path = os.path.join(DOCUMENT_PATH + 'storage/keys/sign_key', str(filename) + '.pem')
+        with open(public_key_path, 'rb') as public_key_file:
+            public_key_data = public_key_file.read()
+
+        # Verify the digital signature
+        is_verified = verify(decrypted_data, signed_data, public_key_data)
+        if not is_verified:
+            flash('File integrity check failed. The file has been tampered with.')
+            return redirect(url_for('secure_blueprint.load'))
+
+
+        # Save the decrypted file to a temporary directory
+        temp_decrypted_file_path = os.path.join(DOCUMENT_PATH + 'temp/', str(filename) + '.pdf')
+        with open(temp_decrypted_file_path, 'wb') as temp_decrypted_file:
+            temp_decrypted_file.write(decrypted_data)
+
+        # Send the decrypted file as an attachment
+        response = send_from_directory(os.path.dirname(temp_decrypted_file_path), os.path.basename(temp_decrypted_file_path), as_attachment=True)
+
+        # Remove the temporary decrypted file
+        os.remove(temp_decrypted_file_path)
+
+        flash('File downloaded successfully')
+        return response
+
+    return render_template("load.html")
