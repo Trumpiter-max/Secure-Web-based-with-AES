@@ -7,7 +7,7 @@ from cryptography.hazmat.primitives.ciphers.algorithms import AES
 from cryptography.hazmat.primitives.ciphers.modes import GCM
 from cryptography.hazmat.primitives.hashes import SHA256
 from cryptography.hazmat.backends import default_backend
-from funcCPABE import generate_key, decrypt_key
+from .funcCPABE import generate_key, decrypt_key
 
 def create_key():
     # Declare the key and IV

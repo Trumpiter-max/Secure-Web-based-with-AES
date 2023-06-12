@@ -68,4 +68,16 @@ def load():
             session['logged_in'] = False
         if session['logged_in'] != True:
             return redirect(url_for('user_blueprint.login'))
-    return "Hello World!"
+    
+    db = get_db()
+    documents = db.documents.find()
+
+    return render_template("load.html", documents=documents)
+
+@secure_blueprint.route("/download/<filename>", methods = ['POST', 'GET'])
+def download(filename):
+    file_name = request.form.get('filename')
+    file_path = os.path.join(DOCUMENT_PATH + 'origin/', str(filename))
+    send_file(file_path, as_attachment=True)
+    flash('File downloaded successfully')
+    return render_template("load.html")

@@ -54,6 +54,6 @@ Close docker-compose
   openssl dgst -sha256 -verify public_key.pem -signature signature.sig data.txt
 ```
 
-Certificates will be stored at `app` and `nginx` directory, make sure both of them are same
+Certificates will be stored at `nginx` directory
 
 ## References

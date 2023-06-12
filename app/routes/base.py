@@ -1,6 +1,6 @@
 # This file contains the base routes for the application
 # Base libraries
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_from_directory, Blueprint
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_from_directory, Blueprint, send_file, make_response
 # Used to connect to database
 import pymongo
 from pymongo import MongoClient
