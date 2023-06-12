@@ -57,22 +57,15 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item dropdown">
-            <a
-              class="nav-link dropdown-toggle"
-              href="#"
-              id="navbarDropdown"
-              role="button"
-              data-toggle="dropdown"
-              aria-haspopup="true"
-              aria-expanded="false"
-            >
-              Product
-            </a>
-            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item" href="/upload">Upload file</a>
-              <a class="dropdown-item" href="/load">Read file</a>
-              <div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="/help">Open turorial</a>
+            <div class="dropdown">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                Product
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <li><a class="dropdown-item" href="/upload">Upload file</a></li>
+                <li><a class="dropdown-item" href="/load">Read file</a></li>
+                <li><a class="dropdown-item" href="/help">Read tutorial</a></li>
+              </ul>
             </div>
           </li>
           <li class="nav-item">
