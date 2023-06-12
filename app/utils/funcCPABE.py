@@ -1,5 +1,6 @@
 # This is CP-ABE AES key generation and encryption
 
+
 from CP_ABE import CPabe_SP21
 from charm.toolbox.pairinggroup import PairingGroup, ZR, GT, extract_key
 from charm.toolbox.symcrypto import AuthenticatedCryptoAbstraction
@@ -9,13 +10,40 @@ from charm.core.engine.util import objectToBytes, bytesToObject
 groupObj = PairingGroup('BN254')
 cpabe = CPabe_SP21(groupObj)
 
-# Define attribute universe, user attributes, and access policy
-U = ['ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE', 'TEN']
-B = ['ONE', 'TWO', 'THREE', 'FOUR', 'FIVE']
-P = ['ONE', 'TWO', 'THREE']
+def set_up(attributes):
+    result = []
+    for i in range(len(attributes)):
+        for j in range(i + 1, len(attributes)):
+            combined = f"{attributes[i]} {attributes[j]}"
+            result.append(combined)
+    return result
 
-(spk, smk) = cpabe.setup(10)
-file_name = "Attribute_list.txt"
+
+def choose_policy_name(choice):
+    policy_names = {
+        1: "LandOwnership_policy.txt",
+        2: "Construction_policy.txt",
+        3: "Property_policy.txt",
+        4: "Agreement_policy.txt",
+    }
+
+    return policy_names.get(choice, "Invalid choice")
+
+#user_input = int(input("Please choose a policy by entering a number (1-4): "))
+#policy_name = choose_policy_name(user_input)
+policy_name = "Property_policy.txt"
+
+# Define attribute universe
+Attributes = ['ABC Real Estate Agency', 'Green Spaces', 'Thu Duc Peoples Committee', 'Property Manager', 'Legal Assistant', 'Architecture', 'Real Estate Brokers', 'Financial Experts', 'Chairman', 'Director Of Real Estate']
+
+U = set_up(Attributes)
+U += ['TAG']
+
+def contains_list(list1, list2):
+    set1 = set(list1)
+    set2 = set(list2)
+    return set2.issubset(set1)
+
 
 def save_list_to_txt(file_name, string_list):
     with open(file_name, "w") as f:
@@ -27,7 +55,7 @@ def load_list_from_txt(file_name):
         string_list = [line.strip() for line in f.readlines()]
     return string_list
 
-def generate_key(pk = spk, mk = smk):
+def generate_key():
     groupObj = PairingGroup('BN254')
     cpabe = CPabe_SP21(groupObj)
 
@@ -36,16 +64,8 @@ def generate_key(pk = spk, mk = smk):
     rand_bytes = objectToBytes(rand_Obj, groupObj)
     #print(rand_bytes)
     
-    # Save the public key to a file
     public_key_file = "public_key.bin"
-    with open(public_key_file, "wb") as f:
-        f.write(objectToBytes(pk, groupObj))
-
-
-	# Save the master key to a file
     master_key_file = "master_key.bin"
-    with open(master_key_file, "wb") as f:
-    	f.write(objectToBytes(mk, groupObj))
 
     # Load the public key from the file
     with open(public_key_file, "rb") as f:
@@ -59,9 +79,11 @@ def generate_key(pk = spk, mk = smk):
 	# Load the master key from the file
     with open(master_key_file, "rb") as f:
         loaded_mk = bytesToObject(f.read(), groupObj)
-
+        
+    P = load_list_from_txt(policy_name)
 
     input_symmetric_key_gt = bytesToObject(rand_bytes, groupObj)
+    
 
     # Encrypt the input symmetric key using the CP-ABE scheme
     ct = cpabe.encrypt(loaded_pk, input_symmetric_key_gt, P, U)
@@ -90,10 +112,19 @@ def decrypt_key():
     with open(master_key_file, "rb") as f:
         loaded_mk = bytesToObject(f.read(), groupObj)
         
+    file_name = "Attribute_list.txt"
     # Load the Attribute from a text file
     loaded_B = load_list_from_txt(file_name)
-
-    dk = cpabe.keygen(loaded_pk, loaded_mk, loaded_B, U)
+    
+    B = set_up(loaded_B)
+    
+    P = load_list_from_txt(policy_name)
+    result = contains_list(P, B)
+    print(result)
+    if result:
+    	P += ['TAG']
+    
+    dk = cpabe.keygen(loaded_pk, loaded_mk, P, U)
 
     encrypted_key_file = "encrypted_object.bin"
 
@@ -112,10 +143,4 @@ def decrypt_key():
     
     
     	
-    	
-
-
-
-
-
-
+    
