@@ -75,10 +75,8 @@ def load():
 
     return render_template("load.html", documents=documents)
 
-@secure_blueprint.route("/download/<filename>")
-def download(filename):
-    file_name = request.form.get('filename')
+@secure_blueprint.route("/download")
+def download():
+    filename = request.args.get('filename')
     file_path = os.path.join(DOCUMENT_PATH + 'origin/', str(filename))
-    send_file(file_path, as_attachment=True)
-    flash('File downloaded successfully')
-    return render_template("load.html")
+    return send_file(file_path, as_attachment=True)
