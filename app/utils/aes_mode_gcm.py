@@ -20,17 +20,23 @@ def create_iv():
     iv = generate_IV()
     return iv
 
+def save_auth_tag(auth_tag, file_path):
+    # string the key in a file
+    with open(file_path, 'wb') as auth_tag_file:
+        auth_tag_file.write(auth_tag)
+
 def encrypt(key, iv, associated_data, plaintext, file_path):
     # Encrypt the plaintext (no padding required for GCM)
     aes_gcm_encryptor = Cipher(AES(key), GCM(iv), default_backend()).encryptor()
     aes_gcm_encryptor.authenticate_additional_data(associated_data)
     ciphertext = aes_gcm_encryptor.update(plaintext) + aes_gcm_encryptor.finalize()
-    global auth_tag
     auth_tag = aes_gcm_encryptor.tag
+    save_auth_tag(auth_tag, file_path + '_auth')
     # opening the key
     # string the key in a file
     with open(file_path, 'wb') as cipher:
         cipher.write(ciphertext)
+    return ciphertext
 
 def decrypt(key, iv, auth_tag, associated_data, ciphertext, file_path):
     aes_gcm_decryptor = Cipher(AES(key), GCM(iv, auth_tag), default_backend()).decryptor()
@@ -40,4 +46,5 @@ def decrypt(key, iv, auth_tag, associated_data, ciphertext, file_path):
     # writing the decrypted data
     with open(file_path, 'wb') as dec_file:
         dec_file.write(recovered_plaintext)
+    return recovered_plaintext
 

@@ -17,12 +17,17 @@
         <div class="col-lg-12 mb-4 mb-sm-5">
             <div class="card card-style1 border-0">
                 <div class="card-body p-1-9 p-sm-2-3 p-md-6 p-lg-7">
-                    <h3>File title: {{ documents['title'] }}</h3>
-                    <p>Name: {{ documents['filename'] }}$</p>
-                    <p>Author: {{ documents['author'] }} </p>
-                    <p>Time upload: {{documents['time'] }}</p>
-                    <p>SHA256 checksum: {{documents['hash'] }}</p>
-                    <a target="_blank" class="fcc-btn" href="{{ url_for('secure_blueprint.download',filename = documents['filename']) + '.pdf' }}">Download</a>  
+                    <form action="/download" method="GET">
+                        <h3>File title: {{ documents['title'] }}</h3>
+                        <p>Name: {{ documents['filename'] }}$</p>
+                        <p>Author: {{ documents['author'] }} </p>
+                        <p>Time upload: {{documents['time'] }}</p>
+                        <p>SHA256 checksum: {{documents['hash'] }}</p>
+                        <p>Passcode for download</p>
+                        <input type="hidden" id="filename" name="filename" value="{{ documents['filename'] }}"/>
+                        <input type="text" id="passcode" name="passcode"/><br/><br/>
+                        <input type="submit" value="Download">  
+                    </form>
                 </div>
             </div>
         </div>

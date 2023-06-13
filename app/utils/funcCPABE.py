@@ -7,6 +7,15 @@ from charm.core.engine.util import objectToBytes, bytesToObject
 groupObj = PairingGroup('BN254')
 cpabe = CPabe_SP21(groupObj)
 
+def get_db():
+    client = MongoClient(host='mongodb',
+                        port=27017, 
+                        username='admin', 
+                        password='admin',
+                        authSource="admin")
+    db = client["sampledb"] # connect to database
+    return db
+
 def set_up(attributes):
     result = []
     for i in range(len(attributes)):
@@ -100,10 +109,8 @@ def generate_IV():
     with open(encrypted_key_file, 'wb') as f:
         f.write(objectToBytes(ct, groupObj))
     return rand_bytes[:12]	
-
 	
-	
-def decrypt_key():
+def decrypt_key(role, organization):
     public_key_file = "/var/www/storage/keys/cpabe_key/public_key.bin"
     # Load the public key from the file
     with open(public_key_file, "rb") as f:
@@ -116,9 +123,10 @@ def decrypt_key():
     # Load the master key from the file
     with open(master_key_file, "rb") as f:
         loaded_mk = bytesToObject(f.read(), groupObj)
-    file_name = "/var/www/storage/attribute/Attribute_list.txt"
-    # Load the Attribute from a text file
-    loaded_B = load_list_from_txt(file_name)
+    # file_name = "/var/www/storage/attribute/Attribute_list.txt"
+    # Load the Attribute
+    # loaded_B = load_list_from_txt(file_name)
+    loaded_B = [organization, role]
     B = set_up(loaded_B)
     P = load_list_from_txt(policy_name)
     result = contains_list(P, B)
@@ -136,7 +144,7 @@ def decrypt_key():
     decrypted_key_bytes = decrypted_key_bytes[:32]
     return decrypted_key_bytes
 
-def decrypt_IV():
+def decrypt_IV(role, organization):
     public_key_file = "/var/www/storage/keys/cpabe_key/public_key.bin"
     # Load the public key from the file
     with open(public_key_file, "rb") as f:
@@ -149,9 +157,10 @@ def decrypt_IV():
     # Load the master key from the file
     with open(master_key_file, "rb") as f:
         loaded_mk = bytesToObject(f.read(), groupObj)
-    file_name = "/var/www/storage/attribute/Attribute_list.txt"
+    # file_name = "/var/www/storage/attribute/Attribute_list.txt"
     # Load the Attribute from a text file
-    loaded_B = load_list_from_txt(file_name)
+    # loaded_B = load_list_from_txt(file_name)
+    loaded_B = [organization, role]
     B = set_up(loaded_B)
     P = load_list_from_txt(policy_name)
     result = contains_list(P, B)

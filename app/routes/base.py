@@ -17,7 +17,7 @@ import random, string
 # Some defined variables
 
 DOCUMENT_PATH = "/var/www/storage/documents/"
-TEMP_PATH = "var/www/storage/temp/"
+TEMP_PATH = "/var/www/storage/temp/"
 
 # Config logging
 
