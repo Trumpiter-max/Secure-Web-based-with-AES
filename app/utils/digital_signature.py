@@ -67,5 +67,5 @@ def save_public_key(public_key, key_name):
         key.write(public_key_pem)
     return 1
 
-def read_public_key(public_key_pem):
-    return public_key
+def read_public_key(content):
+    return serialization.load_pem_public_key(content, backend=default_backend())

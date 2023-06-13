@@ -24,14 +24,19 @@ def upload():
         if not file.filename.lower().endswith('.pdf'):
             flash('Only PDF files are allowed')
             return redirect(request.url)
-        origin_file = file # backup origin file
+        
+        # Save origin file to storage
+        file_name = generate_file_name(40)
+        file.filename = file_name + '.pdf'
+        with open(os.path.join(DOCUMENT_PATH + 'origin/', secure_filename(file.filename)), 'wb') as origin_file:
+            origin_file.write(file.read())
 
         # Some config for file upload
         file_hash = sha256_hash(file)
-        file_name = generate_file_name(30)
-        file_name_pdf = str(file_name) + '.pdf'
         time_save = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         author_name = session['user_name']
+
+        # Addition information for file
         filetitle = request.form.get('title')
         passcode = request.form.get('passcode')
         passcode = bytes(passcode, 'utf-8') # convert to bytes for encryption
@@ -53,8 +58,6 @@ def upload():
         aes_iv = create_iv()
         # Save encrypted file to storage
         encrypt(aes_key, aes_iv, passcode, file.read(), os.path.join(DOCUMENT_PATH + 'encrypted/', file_name))
-        # Save origin file to storage
-        origin_file.save(os.path.join(DOCUMENT_PATH + 'origin/', file_name_pdf))
 
         # Save to database
         db = get_db()
@@ -98,7 +101,7 @@ def download():
         aes_iv = decrypt_IV(str(role), str(organization))
         with open(os.path.join(DOCUMENT_PATH + 'encrypted/', str(filename) + '_auth'), 'rb') as auth_data:
             auth_tag = auth_data.read()
-        recovered_path = os.path.join(TEMP_PATH + 'recovered/', str(filename) + '.pdf')
+        recovered_path = os.path.join(TEMP_PATH + 'recovered/', secure_filename(str(filename) + '.pdf'))
         decrypted_data = decrypt(aes_key, aes_iv, auth_tag, passcode, encrypted_data, recovered_path)
 
         # Load signed file from storage
@@ -111,14 +114,14 @@ def download():
         with open(public_key_path, 'rb') as public_key_file:
             public_key_data = read_public_key(public_key_file.read()) 
             # Verify the digital signature
-            with open(os.path.join(TEMP_PATH + 'recovered/', str(filename) + '.pdf'), 'rb') as recovered_file:
+            with open(os.path.join(TEMP_PATH + 'recovered/', secure_filename(str(filename) + '.pdf')), 'rb') as recovered_file:
                 is_verified = verify(recovered_file, signed_data, public_key_data)
             if not is_verified:
                 flash('File integrity check failed. The file has been tampered with')
                 return redirect(url_for('secure_blueprint.load'))
 
         # Save the decrypted file to a temporary directory
-        temp_decrypted_file_path = os.path.join(TEMP_PATH + 'final/', str(filename) + '.pdf')
+        temp_decrypted_file_path = os.path.join(TEMP_PATH + 'final/', secure_filename(str(filename) + '.pdf'))
         with open(temp_decrypted_file_path, 'wb') as temp_decrypted_file:
             temp_decrypted_file.write(decrypted_data)
         # Send the decrypted file as an attachment
