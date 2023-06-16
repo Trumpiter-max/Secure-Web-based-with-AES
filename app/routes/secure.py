@@ -120,7 +120,7 @@ def download():
         with open(os.path.join(TEMP_PATH + 'recovered/', secure_filename(str(filename) + '.pdf')), 'rb') as recovered_file:
             try:
                 # Load public key from storage
-                key_path = os.path.join('/var/www/storage/keys/sign_key', str(filename) + '.pem')
+                key_path = os.path.join('/var/www/storage/keys/sign_key/', str(filename) + '.pem')
                 public_key_data = read_public_key(key_path) 
                 # Verify the digital signature
                 is_verified = verify(recovered_file, signed_data, public_key_data)
