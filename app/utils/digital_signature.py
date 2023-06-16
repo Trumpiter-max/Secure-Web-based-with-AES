@@ -69,7 +69,8 @@ def save_public_key(public_key, key_name):
     return 1
 
 def read_public_key(key_path):
-    with open(key_path, 'rb') as key_file:
-        content = key_file.read()
-        public_key = serialization.load_pem_public_key(content, backend=default_backend())
+    key_file = open(key_path, 'rb')
+    content = key_file.read()
+    public_key = serialization.load_pem_public_key(content, backend=default_backend())
+    key_file.close()
     return public_key

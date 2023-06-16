@@ -116,16 +116,15 @@ def download():
         signed_file_path = os.path.join(DOCUMENT_PATH + 'signed/', str(filename))
         with open(signed_file_path, 'rb') as signed_file:
             signed_data = signed_file.read()
-
         
         with open(os.path.join(TEMP_PATH + 'recovered/', secure_filename(str(filename) + '.pdf')), 'rb') as recovered_file:
             try:
                 # Load public key from storage
-                public_key_data = read_public_key(os.path.join('/var/www/storage/keys/sign_key', str(filename) + '.pem')) 
+                key_path = os.path.join('/var/www/storage/keys/sign_key', str(filename) + '.pem')
+                public_key_data = read_public_key(key_path) 
                 # Verify the digital signature
                 is_verified = verify(recovered_file, signed_data, public_key_data)
                 if not is_verified:
-                    flash(is_verified)
                     return redirect(url_for('secure_blueprint.load'))
             except:
                 flash('File integrity check failed. The file has been modified')
