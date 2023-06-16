@@ -9,15 +9,17 @@ from cryptography.hazmat.primitives.hashes import SHA256
 from cryptography.hazmat.backends import default_backend
 from .funcCPABE import generate_key, generate_IV, decrypt_key
 
-def create_key():
+def create_key(name):
     # Declare the key and IV
     # 256-bit symmetric key
-    key = generate_key()
+    # key = os.urandom(32)
+    key = generate_key(name)
     return key
 
-def create_iv():
+def create_iv(name):
     # For AES GCM, NIST recommends 96 bit IVs
-    iv = generate_IV()
+    # iv = os.urandom(12)
+    iv = generate_IV(name)
     return iv
 
 def save_auth_tag(auth_tag, file_path):

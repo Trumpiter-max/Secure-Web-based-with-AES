@@ -56,7 +56,7 @@ def load_list_from_txt(file_name):
         string_list = [line.strip() for line in f.readlines()]
     return string_list
 
-def generate_key():
+def generate_key(name):
     groupObj = PairingGroup('BN254')
     cpabe = CPabe_SP21(groupObj)
     rand_Obj = groupObj.random(GT)
@@ -65,8 +65,8 @@ def generate_key():
     master_key_file = "/var/www/storage/keys/cpabe_key/master_key.bin"
     # Load the public key from the file
     with open(public_key_file, "rb") as f:
-    	loaded_pk = bytesToObject(f.read(), groupObj)
-	# Convert the inner dictionary keys back to integers
+        loaded_pk = bytesToObject(f.read(), groupObj)
+    # Convert the inner dictionary keys back to integers
     for key in loaded_pk:
         if isinstance(loaded_pk[key], dict):
             loaded_pk[key] = {int(inner_key): value for inner_key, value in loaded_pk[key].items()}
@@ -78,12 +78,12 @@ def generate_key():
     # Encrypt the input symmetric key using the CP-ABE scheme
     ct = cpabe.encrypt(loaded_pk, input_symmetric_key_gt, P, U)
     # Save the encrypted symmetric key to a file
-    encrypted_key_file = "/var/www/storage/keys/cpabe_key/encrypted_key.bin"
+    encrypted_key_file = "/var/www/storage/keys/aes_key/" + name + "_encrypted_key.bin"
     with open(encrypted_key_file, 'wb') as f:
         f.write(objectToBytes(ct, groupObj))
     return rand_bytes[:32]
     
-def generate_IV():
+def generate_IV(name):
     groupObj = PairingGroup('BN254')
     cpabe = CPabe_SP21(groupObj)
     rand_Obj = groupObj.random(GT)
@@ -92,7 +92,7 @@ def generate_IV():
     master_key_file = "/var/www/storage/keys/cpabe_key/master_key.bin"
     # Load the public key from the file
     with open(public_key_file, "rb") as f:
-    	loaded_pk = bytesToObject(f.read(), groupObj)
+        loaded_pk = bytesToObject(f.read(), groupObj)
 	# Convert the inner dictionary keys back to integers
     for key in loaded_pk:
         if isinstance(loaded_pk[key], dict):
@@ -105,12 +105,12 @@ def generate_IV():
     # Encrypt the input symmetric key using the CP-ABE scheme
     ct = cpabe.encrypt(loaded_pk, input_symmetric_key_gt, P, U)
     # Save the encrypted symmetric key to a file
-    encrypted_key_file = "/var/www/storage/keys/cpabe_key/encrypted_IV.bin"
+    encrypted_key_file = "/var/www/storage/keys/aes_key/" + name + "_encrypted_IV.bin"
     with open(encrypted_key_file, 'wb') as f:
         f.write(objectToBytes(ct, groupObj))
     return rand_bytes[:12]	
 	
-def decrypt_key(role, organization):
+def decrypt_key(role, organization, name):
     public_key_file = "/var/www/storage/keys/cpabe_key/public_key.bin"
     # Load the public key from the file
     with open(public_key_file, "rb") as f:
@@ -132,9 +132,9 @@ def decrypt_key(role, organization):
     result = contains_list(P, B)
     print(result)
     if result:
-    	P += ['TAG']
+        P += ['TAG']
     dk = cpabe.keygen(loaded_pk, loaded_mk, P, U)
-    encrypted_key_file = "/var/www/storage/keys/cpabe_key/encrypted_key.bin"
+    encrypted_key_file = "/var/www/storage/keys/aes_key/" + name + "_encrypted_key.bin"
     # Load the encrypted symmetric key from the file
     with open(encrypted_key_file, "rb") as f:
         loaded_ct = bytesToObject(f.read(), groupObj)
@@ -144,7 +144,7 @@ def decrypt_key(role, organization):
     decrypted_key_bytes = decrypted_key_bytes[:32]
     return decrypted_key_bytes
 
-def decrypt_IV(role, organization):
+def decrypt_IV(role, organization, name):
     public_key_file = "/var/www/storage/keys/cpabe_key/public_key.bin"
     # Load the public key from the file
     with open(public_key_file, "rb") as f:
@@ -166,9 +166,9 @@ def decrypt_IV(role, organization):
     result = contains_list(P, B)
     print(result)
     if result:
-    	P += ['TAG']
+        P += ['TAG']
     dk = cpabe.keygen(loaded_pk, loaded_mk, P, U)
-    encrypted_key_file = "/var/www/storage/keys/cpabe_key/encrypted_IV.bin"
+    encrypted_key_file = "/var/www/storage/keys/aes_key/" + name + "_encrypted_IV.bin"
     # Load the encrypted symmetric key from the file
     with open(encrypted_key_file, "rb") as f:
         loaded_ct = bytesToObject(f.read(), groupObj)

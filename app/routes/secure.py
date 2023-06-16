@@ -49,15 +49,18 @@ def upload():
         save_public_key(public_key, file_name)
         signed_file = sign(file, private_key)
         
-        # Save to check later
-        with open(os.path.join(DOCUMENT_PATH + 'signed/', file_name), 'wb') as save_file:
-            save_file.write(signed_file)
+        with open(os.path.join(DOCUMENT_PATH + 'origin/', secure_filename(file.filename)), 'rb') as file_check:
+            signed_file = sign(file_check, private_key)
+            # Save to check later
+            with open(os.path.join(DOCUMENT_PATH + 'signed/', file_name), 'wb') as save_file:
+                save_file.write(signed_file)
 
         # Encrypt file with AES-GCM
-        aes_key = create_key()
-        aes_iv = create_iv()
+        aes_key = create_key(file_name)
+        aes_iv = create_iv(file_name)
         # Save encrypted file to storage
-        encrypt(aes_key, aes_iv, passcode, file.read(), os.path.join(DOCUMENT_PATH + 'encrypted/', file_name))
+        with open("/var/www/storage/documents/origin/" + secure_filename(file.filename), "rb") as file_data:
+            encrypt(aes_key, aes_iv, passcode, file_data.read(), os.path.join(DOCUMENT_PATH + 'encrypted/', file_name))
 
         # Save to database
         db = get_db()
@@ -96,28 +99,36 @@ def download():
         db = get_db()
         role = db.users.find_one({'username': session['user_name']})['role'] 
         organization = db.users.find_one({'username': session['user_name']})['organization']
-        # Decrypt the file
-        aes_key = decrypt_key(str(role), str(organization))
-        aes_iv = decrypt_IV(str(role), str(organization))
-        with open(os.path.join(DOCUMENT_PATH + 'encrypted/', str(filename) + '_auth'), 'rb') as auth_data:
-            auth_tag = auth_data.read()
-        recovered_path = os.path.join(TEMP_PATH + 'recovered/', secure_filename(str(filename) + '.pdf'))
-        decrypted_data = decrypt(aes_key, aes_iv, auth_tag, passcode, encrypted_data, recovered_path)
+        
+        try:
+            # Decrypt the file
+            aes_key = decrypt_key(str(role), str(organization), str(filename))
+            aes_iv = decrypt_IV(str(role), str(organization), str(filename))
+            with open(os.path.join(DOCUMENT_PATH + 'encrypted/', str(filename) + '_auth'), 'rb') as auth_data:
+                auth_tag = auth_data.read()
+            recovered_path = os.path.join(TEMP_PATH + 'recovered/', secure_filename(str(filename) + '.pdf'))
+            decrypted_data = decrypt(aes_key, aes_iv, auth_tag, passcode, encrypted_data, recovered_path)
+        except:
+            flash('Seems this file is not for you')
+            return redirect(url_for('secure_blueprint.load'))
 
         # Load signed file from storage
         signed_file_path = os.path.join(DOCUMENT_PATH + 'signed/', str(filename))
         with open(signed_file_path, 'rb') as signed_file:
             signed_data = signed_file.read()
 
-        # Load public key from storage
-        public_key_path = os.path.join('/var/www/storage/keys/sign_key', str(filename) + '.pem')
-        with open(public_key_path, 'rb') as public_key_file:
-            public_key_data = read_public_key(public_key_file.read()) 
-            # Verify the digital signature
-            with open(os.path.join(TEMP_PATH + 'recovered/', secure_filename(str(filename) + '.pdf')), 'rb') as recovered_file:
+        
+        with open(os.path.join(TEMP_PATH + 'recovered/', secure_filename(str(filename) + '.pdf')), 'rb') as recovered_file:
+            try:
+                # Load public key from storage
+                public_key_data = read_public_key(os.path.join('/var/www/storage/keys/sign_key', str(filename) + '.pem')) 
+                # Verify the digital signature
                 is_verified = verify(recovered_file, signed_data, public_key_data)
-            if not is_verified:
-                flash('File integrity check failed. The file has been tampered with')
+                if not is_verified:
+                    flash(is_verified)
+                    return redirect(url_for('secure_blueprint.load'))
+            except:
+                flash('File integrity check failed. The file has been modified')
                 return redirect(url_for('secure_blueprint.load'))
 
         # Save the decrypted file to a temporary directory

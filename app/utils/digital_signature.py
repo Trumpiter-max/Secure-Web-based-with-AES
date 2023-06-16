@@ -2,6 +2,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ec, utils
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
+import os
 
 SIGN_KEY_PATH = "/var/www/storage/keys/sign_key/"
 
@@ -14,7 +15,7 @@ def sign(file, private_key):
     
     # Get byte from file 
     byte = file.read(1)
-    while byte != b"":
+    while byte:
         byte = file.read(1)
         hasher.update(byte)
 
@@ -34,7 +35,7 @@ def verify(file, signature, public_key):
 
     # Get byte from file 
     byte = file.read(1)
-    while byte != b"":
+    while byte:
         byte = file.read(1)
         hasher.update(byte)
     
