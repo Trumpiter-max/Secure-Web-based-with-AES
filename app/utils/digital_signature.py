@@ -61,11 +61,14 @@ def create_public_key(private_key):
 def save_public_key(public_key, key_name):
     if (key_name == None or key_name == ""):
         return 0
-    save_path = SIGN_KEY_PATH + key_name + ".pem"
+    save_path = os.path.join(SIGN_KEY_PATH, key_name + ".pem")
     public_key_pem = public_key.public_bytes(encoding=serialization.Encoding.PEM, format=serialization.PublicFormat.SubjectPublicKeyInfo)
     with open(save_path, 'wb') as key:
         key.write(public_key_pem)
     return 1
 
-def read_public_key(content):
-    return serialization.load_pem_public_key(content, backend=default_backend())
+def read_public_key(key_path):
+    with open(key_path, 'rb') as key_file:
+        content = key_file.read()
+        public_key = serialization.load_pem_public_key(content, backend=default_backend())
+    return public_key
