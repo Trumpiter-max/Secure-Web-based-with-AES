@@ -48,7 +48,12 @@ def upload():
             public_key = create_public_key(private_key)
             # Save public key to storage
             save_public_key(public_key, file_name)
-            signed_file = sign(file_check, private_key)
+            
+            #debug-9h32-1706------
+            #signed_file = sign(file_check, private_key)
+            sign_this_file = os.path.join(DOCUMENT_PATH + 'origin/', secure_filename(file.filename))
+            signed_file = sign(sign_this_file, private_key)
+            #----------
             # Save to check later
             with open(os.path.join(DOCUMENT_PATH + 'signed/', file_name), 'wb') as save_file:
                 save_file.write(signed_file)
