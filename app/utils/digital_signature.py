@@ -6,47 +6,46 @@ import os
 
 SIGN_KEY_PATH = "/var/www/storage/keys/sign_key/"
 
-def sign(file, private_key):
-    chosen_hash = hashes.SHA256()
-    hasher = hashes.Hash(
-        chosen_hash, 
-        default_backend()
-    )
-    
-    # Get byte from file 
-    byte = file.read(1)
-    while byte:
+def sign(file_path, private_key):
+    with open(file_path, "rb") as file:
+        chosen_hash = hashes.SHA256()
+        hasher = hashes.Hash(
+            chosen_hash, 
+            default_backend()
+        )
         byte = file.read(1)
-        hasher.update(byte)
-
-    digest = hasher.finalize()
-    signature = private_key.sign(
-        digest,
-        ec.ECDSA(utils.Prehashed(chosen_hash))
-    )
+        while byte != b"":
+            byte = file.read(1)
+            hasher.update(byte)
+        digest = hasher.finalize()
+        signature = private_key.sign(
+            digest,
+            ec.ECDSA(utils.Prehashed(chosen_hash))
+        )
     return signature
 
-def verify(file, signature, public_key):
-    chosen_hash = hashes.SHA256()
-    hasher = hashes.Hash(
-        chosen_hash, 
-        default_backend()
-    )
-
-    # Get byte from file 
-    byte = file.read(1)
-    while byte:
+def verify(file_path, signature, public_key):
+    with open(file_path, "rb") as file:
+        chosen_hash = hashes.SHA256()
+        hasher = hashes.Hash(
+            chosen_hash, 
+            default_backend()
+        )
         byte = file.read(1)
-        hasher.update(byte)
-    
-    digest = hasher.finalize()
-
-    checker = public_key.verify(
-        signature,
-        digest,
-        ec.ECDSA(utils.Prehashed(chosen_hash))
-    )
-    return checker
+        while byte != b"":
+            byte = file.read(1)
+            hasher.update(byte)
+        digest = hasher.finalize()
+        try:
+            public_key.verify(
+                signature,
+                digest,
+                ec.ECDSA(utils.Prehashed(chosen_hash))
+            )
+            return True
+        except Exception as e:
+            print(f"Verification failed: {e}")
+            return False
 
 def create_private_key():
     private_key = ec.generate_private_key(
