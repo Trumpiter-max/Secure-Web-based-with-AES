@@ -117,9 +117,10 @@ def download():
         with open(signed_file_path, 'rb') as signed_file:
             signed_data = signed_file.read()
         
-        with open(os.path.join(DOCUMENT_PATH + 'origin/', secure_filename(str(filename) + '.pdf')), 'rb') as recovered_file:
+        recovered_file = os.path.join(DOCUMENT_PATH + 'origin/', secure_filename(str(filename) + '.pdf'))
+        #with open(os.path.join(DOCUMENT_PATH + 'origin/', secure_filename(str(filename) + '.pdf')), 'rb') as recovered_file:
         #with open(os.path.join(TEMP_PATH + 'recovered/', secure_filename(str(filename) + '.pdf')), 'rb') as recovered_file:
-            try:
+        try:
                 # Load public key from storage
                 key_path = os.path.join('/var/www/storage/keys/sign_key/', str(filename) + '.pem')
                 public_key_data = read_public_key(key_path) 
@@ -130,7 +131,7 @@ def download():
                     return redirect(url_for('secure_blueprint.load'))
             except:
                 flash('File integrity check failed. The file has been modified')
-                return redirect(url_for('secure_blueprint.load'))
+                return redirect(url_for('secure_blueprint.load'))    
 
         # Save the decrypted file to a temporary directory
         temp_decrypted_file_path = os.path.join(TEMP_PATH + 'recovered/', secure_filename(str(filename) + '.pdf'))
