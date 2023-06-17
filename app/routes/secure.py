@@ -129,7 +129,7 @@ def download():
                 if not is_verified:
                     flash("Failed to load file")
                     return redirect(url_for('secure_blueprint.load'))
-            except:
+        except:
                 flash('File integrity check failed. The file has been modified')
                 return redirect(url_for('secure_blueprint.load'))    
 
