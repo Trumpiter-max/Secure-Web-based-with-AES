@@ -97,6 +97,12 @@ def profile():
 
 @user_blueprint.route('/logout')
 def logout():
+    if request.method == 'GET':
+        if not session.get('logged_in'):
+            session['logged_in'] = False
+        if session['logged_in'] != True:
+            return redirect(url_for('user_blueprint.login'))
+
     session.pop('user_name', None)
     session['logged_in'] = False
     flash('You have been logged out')

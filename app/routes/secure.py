@@ -59,7 +59,7 @@ def upload():
         aes_key = create_key(file_name)
         aes_iv = create_iv(file_name)
         # Save encrypted file to storage
-        with open("/var/www/storage/documents/origin/" + secure_filename(file.filename), "rb") as file_data:
+        with open(DOCUMENT_PATH + "origin/" + secure_filename(file.filename), "rb") as file_data:
             encrypt(aes_key, aes_iv, passcode, file_data.read(), os.path.join(DOCUMENT_PATH + 'encrypted/', file_name))
 
         # Save to database
@@ -117,7 +117,8 @@ def download():
         with open(signed_file_path, 'rb') as signed_file:
             signed_data = signed_file.read()
         
-        with open(os.path.join(TEMP_PATH + 'recovered/', secure_filename(str(filename) + '.pdf')), 'rb') as recovered_file:
+        with open(os.path.join(DOCUMENT_PATH + 'origin/', secure_filename(str(filename) + '.pdf')), 'rb') as recovered_file:
+        #with open(os.path.join(TEMP_PATH + 'recovered/', secure_filename(str(filename) + '.pdf')), 'rb') as recovered_file:
             try:
                 # Load public key from storage
                 key_path = os.path.join('/var/www/storage/keys/sign_key/', str(filename) + '.pem')
@@ -125,21 +126,21 @@ def download():
                 # Verify the digital signature
                 is_verified = verify(recovered_file, signed_data, public_key_data)
                 if not is_verified:
+                    flash("Failed to load file")
                     return redirect(url_for('secure_blueprint.load'))
             except:
                 flash('File integrity check failed. The file has been modified')
                 return redirect(url_for('secure_blueprint.load'))
 
         # Save the decrypted file to a temporary directory
-        temp_decrypted_file_path = os.path.join(TEMP_PATH + 'final/', secure_filename(str(filename) + '.pdf'))
+        temp_decrypted_file_path = os.path.join(TEMP_PATH + 'recovered/', secure_filename(str(filename) + '.pdf'))
         with open(temp_decrypted_file_path, 'wb') as temp_decrypted_file:
             temp_decrypted_file.write(decrypted_data)
         # Send the decrypted file as an attachment
-        send_file(temp_decrypted_file_path, as_attachment=True)
+        # send_file(temp_decrypted_file_path, as_attachment=True)
         # Remove the temporary decrypted file
         os.remove(temp_decrypted_file_path)
         flash('File downloaded successfully')
-        # return redirect(url_for('secure_blueprint.load'))
     
     return redirect(url_for('secure_blueprint.load'))
 
