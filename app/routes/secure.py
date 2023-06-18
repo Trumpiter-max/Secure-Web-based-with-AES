@@ -132,7 +132,7 @@ def download():
         # Save the decrypted file to a temporary directory
         temp_decrypted_file_path = os.path.join(TEMP_PATH, 'recovered')
         # Download the decrypted file as an attachment
-        send_from_directory(directory=temp_decrypted_file_path, path=(str(filename) + '.pdf'), as_attachment=True)
+        return send_from_directory(directory=temp_decrypted_file_path, path=(str(filename) + '.pdf'), as_attachment=True)
         time.sleep(10)
         flash('File downloaded successfully')
         # Remove the temporary decrypted file
