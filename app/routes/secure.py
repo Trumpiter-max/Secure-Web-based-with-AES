@@ -84,59 +84,60 @@ def load():
 
 @secure_blueprint.route("/download", methods = ['POST', 'GET'])
 def download():
-    # Get the passcode from the form
-    filename = request.args.get('filename')
-    passcode = request.args.get('passcode')
+    if request.method == 'POST':
+        # Get the passcode from the form
+        filename = request.args.get('filename')
+        passcode = request.args.get('passcode')
 
-    if passcode and filename:
-        passcode = bytes(passcode, 'utf-8')  # convert to bytes for decryption
-        # Load encrypted file from storage
-        encrypted_file_path = os.path.join(DOCUMENT_PATH + 'encrypted/', str(filename))
-        with open(encrypted_file_path, 'rb') as encrypted_file:
-            encrypted_data = encrypted_file.read()
+        if passcode and filename:
+            passcode = bytes(passcode, 'utf-8')  # convert to bytes for decryption
+            # Load encrypted file from storage
+            encrypted_file_path = os.path.join(DOCUMENT_PATH + 'encrypted/', str(filename))
+            with open(encrypted_file_path, 'rb') as encrypted_file:
+                encrypted_data = encrypted_file.read()
             
-        db = get_db()
-        role = db.users.find_one({'username': session['user_name']})['role'] 
-        organization = db.users.find_one({'username': session['user_name']})['organization']
+            db = get_db()
+            role = db.users.find_one({'username': session['user_name']})['role'] 
+            organization = db.users.find_one({'username': session['user_name']})['organization']
         
-        try:
-            # Decrypt the file
-            aes_key = decrypt_key(str(role), str(organization), str(filename))
-            aes_iv = decrypt_IV(str(role), str(organization), str(filename))
-            with open(os.path.join(DOCUMENT_PATH + 'encrypted/', str(filename) + '_auth'), 'rb') as auth_data:
-                auth_tag = auth_data.read()
-            recovered_path = os.path.join(TEMP_PATH + 'recovered/', secure_filename(str(filename) + '.pdf'))
-            decrypted_data = decrypt(aes_key, aes_iv, auth_tag, passcode, encrypted_data, recovered_path)
-        except:
-            flash('Seems this file is not for you, contact the admin for more information')
-            return redirect(url_for('secure_blueprint.load'))
-
-        # Load signed file from storage
-        signed_file_path = os.path.join(DOCUMENT_PATH + 'signed/', str(filename))
-        with open(signed_file_path, 'rb') as signed_file:
-            signed_data = signed_file.read()
             try:
+                # Decrypt the file
+                aes_key = decrypt_key(str(role), str(organization), str(filename))
+                aes_iv = decrypt_IV(str(role), str(organization), str(filename))
+                with open(os.path.join(DOCUMENT_PATH + 'encrypted/', str(filename) + '_auth'), 'rb') as auth_data:
+                    auth_tag = auth_data.read()
                 recovered_path = os.path.join(TEMP_PATH + 'recovered/', secure_filename(str(filename) + '.pdf'))
-                # Load public key from storage
-                key_path = os.path.join('/var/www/storage/keys/sign_key/', str(filename) + '.pem')
-                public_key_data = read_public_key(key_path) 
-                # Verify the digital signature
-                is_verified = verify(recovered_path, signed_data, public_key_data)
-                if not is_verified:
-                    flash('File integrity check failed. The file has been modified')
-                    return redirect(url_for('secure_blueprint.load'))
-            except Exception as error:
-                flash("Error: " + str(error))
-                return redirect(url_for('secure_blueprint.load'))    
+                decrypted_data = decrypt(aes_key, aes_iv, auth_tag, passcode, encrypted_data, recovered_path)
+            except:
+                flash('Seems this file is not for you, contact the admin for more information')
+                return redirect(url_for('secure_blueprint.load'))
 
-        # Save the decrypted file to a temporary directory
-        temp_decrypted_file_path = os.path.join(TEMP_PATH, 'recovered')
-        # Download the decrypted file as an attachment
-        send_from_directory(directory=temp_decrypted_file_path, path=(str(filename) + '.pdf'), as_attachment=True)
-        time.sleep(10)
-        flash('File downloaded successfully')
-        # Remove the temporary decrypted file
-        os.remove(temp_decrypted_file_path + '/' + str(filename) + '.pdf')
+            # Load signed file from storage
+            signed_file_path = os.path.join(DOCUMENT_PATH + 'signed/', str(filename))
+            with open(signed_file_path, 'rb') as signed_file:
+                signed_data = signed_file.read()
+                try:
+                    recovered_path = os.path.join(TEMP_PATH + 'recovered/', secure_filename(str(filename) + '.pdf'))
+                    # Load public key from storage
+                    key_path = os.path.join('/var/www/storage/keys/sign_key/', str(filename) + '.pem')
+                    public_key_data = read_public_key(key_path) 
+                    # Verify the digital signature
+                    is_verified = verify(recovered_path, signed_data, public_key_data)
+                    if not is_verified:
+                        flash('File integrity check failed. The file has been modified')
+                        return redirect(url_for('secure_blueprint.load'))
+                except Exception as error:
+                    flash("Error: " + str(error))
+                   return redirect(url_for('secure_blueprint.load'))    
+
+            # Save the decrypted file to a temporary directory
+            temp_decrypted_file_path = os.path.join(TEMP_PATH, 'recovered')
+            # Download the decrypted file as an attachment
+            send_from_directory(directory=temp_decrypted_file_path, path=(str(filename) + '.pdf'), as_attachment=True)
+            time.sleep(10)
+            flash('File downloaded successfully')
+            # Remove the temporary decrypted file
+            os.remove(temp_decrypted_file_path + '/' + str(filename) + '.pdf')
     
     return redirect(url_for('secure_blueprint.load'))
 
