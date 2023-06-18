@@ -130,13 +130,13 @@ def download():
                 return redirect(url_for('secure_blueprint.load'))    
 
         # Save the decrypted file to a temporary directory
-        temp_decrypted_file_path = os.path.join(TEMP_PATH, 'recovered')
+        temp_decrypted_file_path = os.path.join(TEMP_PATH + 'recovered/', secure_filename(str(filename) + '.pdf'))
         # Download the decrypted file as an attachment
-        send_from_directory(directory=temp_decrypted_file_path, path=(str(filename) + '.pdf'), as_attachment=True)
-        time.sleep(10)
-        flash('File downloaded successfully')
+        response = send_file(temp_decrypted_file_path, as_attachment=True)
+        response.headers['Content-Disposition'] = 'attachment; filename=' + str(filename) + '.pdf'
         # Remove the temporary decrypted file
-        os.remove(temp_decrypted_file_path + '/' + str(filename) + '.pdf')
+        os.remove(temp_decrypted_file_path)
+        return response
     
     return redirect(url_for('secure_blueprint.load'))
 
