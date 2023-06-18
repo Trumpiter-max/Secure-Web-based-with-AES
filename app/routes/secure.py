@@ -98,6 +98,7 @@ def download():
         db = get_db()
         role = db.users.find_one({'username': session['user_name']})['role'] 
         organization = db.users.find_one({'username': session['user_name']})['organization']
+        title = db.documents.find_one({'filename': filename})['title']
         
         try:
             # Decrypt the file
@@ -106,7 +107,7 @@ def download():
             with open(os.path.join(DOCUMENT_PATH + 'encrypted/', str(filename) + '_auth'), 'rb') as auth_data:
                 auth_tag = auth_data.read()
             recovered_path = os.path.join(TEMP_PATH + 'recovered/', secure_filename(str(filename) + '.pdf'))
-            decrypted_data = decrypt(aes_key, aes_iv, auth_tag, passcode, encrypted_data, recovered_path)
+            decrypt(aes_key, aes_iv, auth_tag, passcode, encrypted_data, recovered_path)
         except:
             flash('Seems this file is not for you, contact the admin for more information')
             return redirect(url_for('secure_blueprint.load'))
@@ -133,7 +134,7 @@ def download():
         temp_decrypted_file_path = os.path.join(TEMP_PATH + 'recovered/', secure_filename(str(filename) + '.pdf'))
         # Download the decrypted file as an attachment
         response = send_file(temp_decrypted_file_path, as_attachment=True)
-        response.headers['Content-Disposition'] = 'attachment; filename=' + str(filename) + '.pdf'
+        response.headers['Content-Disposition'] = 'attachment; filename=' + title + '.pdf'
         # Remove the temporary decrypted file
         os.remove(temp_decrypted_file_path)
         return response
