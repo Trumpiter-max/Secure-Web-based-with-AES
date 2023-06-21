@@ -104,7 +104,8 @@ def decrypt_key(role, organization, name):
     with open(master_key_file, "rb") as f:
         loaded_mk = bytesToObject(f.read(), groupObj)
     
-    loaded_B = [organization, role]
+    B = [organization, role]
+    loaded_B = [word.split()[0].upper() for word in B]
 
     dk = cpabe.keygen(loaded_pk, loaded_mk, loaded_B)
     encrypted_key_file = "/var/www/storage/keys/aes_key/" + name + "_encrypted_key.bin"
@@ -131,7 +132,8 @@ def decrypt_IV(role, organization, name):
     with open(master_key_file, "rb") as f:
         loaded_mk = bytesToObject(f.read(), groupObj)
     
-    loaded_B = [organization, role]
+    B = [organization, role]
+    loaded_B = [word.split()[0].upper() for word in B]
 
     dk = cpabe.keygen(loaded_pk, loaded_mk, loaded_B)
     encrypted_key_file = "/var/www/storage/keys/aes_key/" + name + "_encrypted_IV.bin"
