@@ -16,7 +16,7 @@ def choose_policy_name(choice):
     }
     return policy_names.get(choice, "Invalid choice")
 
-def generate_key(name):
+def generate_key(name, policy):
     groupObj = PairingGroup('SS512')
     cpabe = CPabe_BSW07(groupObj)
     rand_Obj = groupObj.random(GT)
@@ -30,19 +30,18 @@ def generate_key(name):
         if isinstance(loaded_pk[key], dict):
             loaded_pk[key] = {int(inner_key): value for inner_key, value in loaded_pk[key].items()}
         
-    #access_policy = '(hello and (three or one))'
-    with open(policy_name, 'r') as file:
-        P = file.read()
+    # with open(policy_name, 'r') as file:
+    #     P = file.read()
         
     # Encrypt the input symmetric key using the CP-ABE scheme
-    ct = cpabe.encrypt(loaded_pk, rand_Obj, P)
+    ct = cpabe.encrypt(loaded_pk, rand_Obj, policy)
     # Save the encrypted symmetric key to a file
     encrypted_key_file = "/var/www/storage/keys/aes_key/" + name + "_encrypted_key.bin"
     with open(encrypted_key_file, 'wb') as f:
         f.write(objectToBytes(ct, groupObj))
     return rand_bytes[:32]
     
-def generate_IV(name):
+def generate_IV(name, policy):
     groupObj = PairingGroup('SS512')
     cpabe = CPabe_BSW07(groupObj)
     rand_Obj = groupObj.random(GT)
@@ -56,12 +55,11 @@ def generate_IV(name):
         if isinstance(loaded_pk[key], dict):
             loaded_pk[key] = {int(inner_key): value for inner_key, value in loaded_pk[key].items()}
         
-    #access_policy = '(hello and (three or one))'
-    with open(policy_name, 'r') as file:
-        P = file.read()
+    # with open(policy_name, 'r') as file:
+    #     P = file.read()
         
     # Encrypt the input symmetric key using the CP-ABE scheme
-    ct = cpabe.encrypt(loaded_pk, rand_Obj, P)
+    ct = cpabe.encrypt(loaded_pk, rand_Obj, policy)
     # Save the encrypted symmetric key to a file
     encrypted_key_file = "/var/www/storage/keys/aes_key/" + name + "_encrypted_IV.bin"
     with open(encrypted_key_file, 'wb') as f:

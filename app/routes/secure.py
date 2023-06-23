@@ -62,6 +62,7 @@ def upload():
         # Addition information for file
         filetitle = request.form.get('title')
         passcode = request.form.get('passcode')
+        policy = request.form.get('policy')
         passcode = bytes(passcode, 'utf-8') # convert to bytes for encryption
         
         # Digital signature for file
@@ -77,8 +78,8 @@ def upload():
             save_file.write(signed_file)
 
         # Encrypt file with AES-GCM
-        aes_key = create_key(file_name)
-        aes_iv = create_iv(file_name)
+        aes_key = create_key(file_name, policy)
+        aes_iv = create_iv(file_name, policy)
         # Save encrypted file to storage
         with open(DOCUMENT_PATH + "origin/" + secure_filename(file.filename), "rb") as file_data:
             encrypt(aes_key, aes_iv, passcode, file_data.read(), os.path.join(DOCUMENT_PATH + 'encrypted/', file_name))
