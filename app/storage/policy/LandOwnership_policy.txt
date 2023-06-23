@@ -1,1 +1,1 @@
-(thu or (green and (property or legal) or (abc and brokers))
+(thu or (green and (property or legal) or (abc and brokers)))

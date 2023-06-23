@@ -9,12 +9,34 @@ secure_blueprint = Blueprint('secure_blueprint', __name__, template_folder='temp
 
 @secure_blueprint.route("/upload", methods = ['POST', 'GET'])
 def upload():
-    if request.method == 'GET':
-        if not session.get('logged_in'):
-            session['logged_in'] = False
-        if session['logged_in'] != True:
-            return redirect(url_for('user_blueprint.login'))
+
+    if not session.get('logged_in'):
+        session['logged_in'] = False
+    if session['logged_in'] != True:
+        return redirect(url_for('user_blueprint.login'))
+
+    # Save to database
+    db = get_db()
+    users = db.users
+    # Validate user
+    check_user = users.find_one({'username': session['user_name']})
+    check_user_organization = check_user['organization']
+    check_user_role = check_user['role']
     
+    if check_user_organization != "ABC Real Estate Agency" and check_user_organization != "Green Spaces":
+        flash("You are not authorized to upload file")
+        return redirect(url_for('general_blueprint.index'))
+
+    if check_user_organization == "ABC Real Estate Agency":
+        if check_user_role != "Legal Assistant" and check_user_role != "Financial Experts":
+            flash("You are not authorized to upload file")
+            return redirect(url_for('general_blueprint.index'))
+            
+    if check_user_organization == "Green Spaces":
+        if check_user_role != "Property Manager" and check_user_role != "Legal Assistant":
+            flash("You are not authorized to upload file")
+            return redirect(url_for('general_blueprint.index'))
+            
     if request.method == 'POST':
         # Handle file upload
         if 'file' not in request.files:
@@ -61,29 +83,54 @@ def upload():
         with open(DOCUMENT_PATH + "origin/" + secure_filename(file.filename), "rb") as file_data:
             encrypt(aes_key, aes_iv, passcode, file_data.read(), os.path.join(DOCUMENT_PATH + 'encrypted/', file_name))
 
-        # Save to database
-        db = get_db()
         documents = db.documents
         file_data = {'title': filetitle, 'filename': file_name, 'author': author_name, 'time': time_save, 'hash': file_hash}
         documents.insert_one(file_data)
         flash('File uploaded successfully')
+                
     return render_template("upload.html")
 
 @secure_blueprint.route("/load", methods = ['POST', 'GET'])
 def load():
-    if request.method == 'GET':
-        if not session.get('logged_in'):
-            session['logged_in'] = False
-        if session['logged_in'] != True:
-            return redirect(url_for('user_blueprint.login'))
+
+    if not session.get('logged_in'):
+        session['logged_in'] = False
+    if session['logged_in'] != True:
+        return redirect(url_for('user_blueprint.login'))
     
     db = get_db()
-    documents = db.documents.find()
+    users = db.users
+    check_user = users.find_one({'username': session['user_name']})
+    check_user_organization = check_user['organization']
+    check_user_role = check_user['role']
 
+    # Validate user
+    if check_user_organization == "ABC Real Estate Agency":
+        if check_user_role != "Legal Assistant" and check_user_role != "Financial Experts" and check_user_role != "Real Estate Brokers" and check_user_role != "Architecture":
+            flash("You are not authorized to view file")
+            return redirect(url_for('general_blueprint.index'))
+        
+    if check_user_organization == "Green Real Estate Agency":
+        if check_user_role != "Property Manager" and check_user_role != "Legal Assistant":
+            flash("You are not authorized to view file")
+            return redirect(url_for('general_blueprint.index'))
+        
+    if check_user_organization == "Thu Duc Peoples Committee":
+        if check_user_role != "Chairman" and check_user_role != "Director Of Resources":
+            flash("You are not authorized to view file")
+            return redirect(url_for('general_blueprint.index'))
+    
+    documents = db.documents.find()
     return render_template("load.html", documents=documents)
 
 @secure_blueprint.route("/download", methods = ['POST', 'GET'])
 def download():
+
+    if not session.get('logged_in'):
+        session['logged_in'] = False
+    if session['logged_in'] != True:
+        return redirect(url_for('user_blueprint.login'))
+    
     # Get the passcode from the form
     filename = request.args.get('filename')
     passcode = request.args.get('passcode')

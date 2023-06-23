@@ -7,16 +7,7 @@ from charm.toolbox.secretutil import SecretUtil
 # Initialize CP-ABE
 groupObj = PairingGroup('SS512')
 cpabe = CPabe_BSW07(groupObj)
-
-def get_db():
-    client = MongoClient(host='mongodb',
-                        port=27017, 
-                        username='admin', 
-                        password='admin',
-                        authSource="admin")
-    db = client["sampledb"] # connect to database
-    return db
-
+policy_name = "/var/www/storage/policy/Property_policy.txt"
 
 def choose_policy_name(choice):
     policy_names = {
@@ -27,16 +18,12 @@ def choose_policy_name(choice):
     }
     return policy_names.get(choice, "Invalid choice")
 
-policy_name = "/var/www/storage/policy/Property_policy.txt"
-
-
 def generate_key(name):
     groupObj = PairingGroup('SS512')
     cpabe = CPabe_BSW07(groupObj)
     rand_Obj = groupObj.random(GT)
     rand_bytes = objectToBytes(rand_Obj, groupObj)
     public_key_file = "/var/www/storage/keys/cpabe_key/public_key.bin"
-    master_key_file = "/var/www/storage/keys/cpabe_key/master_key.bin"
     # Load the public key from the file
     with open(public_key_file, "rb") as f:
         loaded_pk = bytesToObject(f.read(), groupObj)
@@ -44,16 +31,13 @@ def generate_key(name):
     for key in loaded_pk:
         if isinstance(loaded_pk[key], dict):
             loaded_pk[key] = {int(inner_key): value for inner_key, value in loaded_pk[key].items()}
-	# Load the master key from the file
-    with open(master_key_file, "rb") as f:
-        loaded_mk = bytesToObject(f.read(), groupObj) 
         
     #access_policy = '(hello and (three or one))'
     with open(policy_name, 'r') as file:
         P = file.read()
         
     # Encrypt the input symmetric key using the CP-ABE scheme
-    ct = cpabe.encrypt(loaded_pk, rand_Obj, access_policy)
+    ct = cpabe.encrypt(loaded_pk, rand_Obj, P)
     # Save the encrypted symmetric key to a file
     encrypted_key_file = "/var/www/storage/keys/aes_key/" + name + "_encrypted_key.bin"
     with open(encrypted_key_file, 'wb') as f:
@@ -66,7 +50,6 @@ def generate_IV(name):
     rand_Obj = groupObj.random(GT)
     rand_bytes = objectToBytes(rand_Obj, groupObj)
     public_key_file = "/var/www/storage/keys/cpabe_key/public_key.bin"
-    master_key_file = "/var/www/storage/keys/cpabe_key/master_key.bin"
     # Load the public key from the file
     with open(public_key_file, "rb") as f:
         loaded_pk = bytesToObject(f.read(), groupObj)
@@ -74,16 +57,13 @@ def generate_IV(name):
     for key in loaded_pk:
         if isinstance(loaded_pk[key], dict):
             loaded_pk[key] = {int(inner_key): value for inner_key, value in loaded_pk[key].items()}
-	# Load the master key from the file
-    with open(master_key_file, "rb") as f:
-        loaded_mk = bytesToObject(f.read(), groupObj) 
         
     #access_policy = '(hello and (three or one))'
     with open(policy_name, 'r') as file:
         P = file.read()
         
     # Encrypt the input symmetric key using the CP-ABE scheme
-    ct = cpabe.encrypt(loaded_pk, rand_Obj, access_policy)
+    ct = cpabe.encrypt(loaded_pk, rand_Obj, P)
     # Save the encrypted symmetric key to a file
     encrypted_key_file = "/var/www/storage/keys/aes_key/" + name + "_encrypted_IV.bin"
     with open(encrypted_key_file, 'wb') as f:

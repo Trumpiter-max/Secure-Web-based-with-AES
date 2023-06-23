@@ -25,7 +25,8 @@ services:
     links:
       - mongodb
     networks:
-      - mongo_net
+      - backend_net
+      - frontend_net
 
   webserver:
     container_name: webserver
@@ -37,7 +38,25 @@ services:
     depends_on:
       - webservice
     networks:
-      - mongo_net
+      - frontend_net
+
+  dnsduck:
+    container_name: dnsduck
+    image: lscr.io/linuxserver/duckdns:latest
+    restart: unless-stopped
+    dns:
+      - 1.1.1.1
+    volumes:
+      - dnsduck_config:/data/dnsduck
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC 
+      - SUBDOMAINS=lockedsite.duckdns.org
+      - TOKEN=29986796-52d6-49d6-b310-677f90d0e80d
+      - LOG_FILE=true
+    networks:
+      - frontend_net
 
   mongodb:
     image: mongo:latest
@@ -56,7 +75,7 @@ services:
       - mongodb:/data/db
       - mongoconfig:/data/configdb
     networks:
-      - mongo_net
+      - backend_net
 
 volumes:
   nginxdata:
@@ -65,7 +84,14 @@ volumes:
     driver: local
   mongoconfig:
     driver: local
+  dnsduck_config:
+    driver: local
 
 networks:
-  mongo_net:
+  backend_net:
+    name: backend_net
     driver: bridge
+  frontend_net:
+    name: frontend_net
+    driver: bridge
+    external: true

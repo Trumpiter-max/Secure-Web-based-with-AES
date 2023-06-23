@@ -8,7 +8,6 @@
     - [Requirements](#requirements)
       - [Libraries](#libraries)
     - [How to use](#how-to-use)
-  - [Self sign certificate](#self-sign-certificate)
   - [References](#references)
 
 ---
@@ -43,20 +42,10 @@ Close docker-compose
   docker-compose down 
 ```
 
-## Self sign certificate
-
-```sh
-  openssl ecparam -genkey -name prime256v1 -out private_key.pem
-  openssl ec -in private_key.pem -pubout -out public_key.pem
-  openssl req -new -key private_key.pem -out csr.pem
-  openssl x509 -req -days 365 -in csr.pem -signkey private_key.pem -out certificate.crt
-  openssl dgst -sha256 -sign private_key.pem -out signature.sig data.txt
-  openssl dgst -sha256 -verify public_key.pem -signature signature.sig data.txt
-```
-
 Certificates will be stored at `nginx` directory
 
 ## References
-https://github.com/JHUISI/charm
 
-https://jhuisi.github.io/charm/charm/schemes/abenc/bsw07.html
+- Charm: [1](https://github.com/JHUISI/charm), [2](https://jhuisi.github.io/charm/charm/schemes/abenc/bsw07.html)
+
+

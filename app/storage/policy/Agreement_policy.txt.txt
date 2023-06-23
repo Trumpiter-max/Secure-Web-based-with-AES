@@ -1,1 +1,1 @@
-(thu or ((green or abc) and legal))) 
+(thu or ((green or abc) and legal))
