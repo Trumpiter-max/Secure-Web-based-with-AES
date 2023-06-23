@@ -1,8 +1,6 @@
 from .cpabe import CPabe_BSW07
-from charm.toolbox.pairinggroup import PairingGroup, ZR, GT, extract_key
-from charm.toolbox.symcrypto import AuthenticatedCryptoAbstraction
+from charm.toolbox.pairinggroup import PairingGroup, ZR, GT
 from charm.core.engine.util import objectToBytes, bytesToObject
-from charm.toolbox.secretutil import SecretUtil
 
 # Initialize CP-ABE
 groupObj = PairingGroup('SS512')
